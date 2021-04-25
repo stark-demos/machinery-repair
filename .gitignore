@@ -3,3 +3,5 @@
 .classpath
 .vscode
 target
+ObjectStore
+PutObjectStore*
