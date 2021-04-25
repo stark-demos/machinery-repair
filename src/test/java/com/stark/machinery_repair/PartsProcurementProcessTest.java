@@ -36,8 +36,8 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("partsAvailable", Boolean.TRUE);
         parameters.put("repairRequest", "");
-        parameters.put("partCode", "");
-        parameters.put("quantity", 0L);
+        parameters.put("partCode", "A");
+        parameters.put("quantity", 1);
         parameters.put("wsJsonRequest", "");
         parameters.put("getInventoryUrl", "inventoryUrl");
         parameters.put("assignPartsUrl", "assignPartsUrl");
@@ -55,12 +55,14 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         assertEquals("GET", workItem.getParameter("Method"));
 
         Map<String, Object> workItemResult = new HashMap<>();
-        workItemResult.put("Result", "GET INVENTORY RESPONSE");
+        String wsResult = "{\"partCode\":\"A\", \"availableQuantity\":20}";
+        workItemResult.put("Result", wsResult);
 
         // complete the work item
         ksession.getWorkItemManager().completeWorkItem(workItem.getId(), workItemResult);
-        assertEquals("GET INVENTORY RESPONSE", getVariableValue("wsJsonResponse", processInstanceId, ksession));
+        assertEquals(wsResult, getVariableValue("wsJsonResponse", processInstanceId, ksession));
         assertNodeActive(processInstanceId, ksession, "Assign parts to Repair Request");
+        assertEquals(true, getVariableValue("partsAvailable", processInstanceId, ksession));
 
         // Assign parts work item
         workItem = testHandler.getWorkItem();
