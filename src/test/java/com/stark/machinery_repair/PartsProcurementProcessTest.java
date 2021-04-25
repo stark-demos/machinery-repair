@@ -209,6 +209,48 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         completeHappyPath(processInstanceId, ksession, testHandler);
     }
 
+    @Test
+    public void testPurchaseOrderRequested() {
+        logger.debug("START testAssignPartsToRepairRequestSuccees");
+        createRuntimeManager("com/stark/machinery_repair/parts-procurement.bpmn");
+        RuntimeEngine runtimeEngine = getRuntimeEngine();
+        KieSession ksession = runtimeEngine.getKieSession();
+        TestWorkItemHandler testHandler = new TestWorkItemHandler();
+        ksession.getWorkItemManager().registerWorkItemHandler("Rest", testHandler);
+        
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("partsAvailable", Boolean.TRUE);
+        parameters.put("repairRequest", "");
+        parameters.put("partCode", "A");
+        parameters.put("quantity", 1);
+        parameters.put("wsJsonRequest", "");
+        parameters.put("getInventoryUrl", "inventoryUrl");
+        parameters.put("assignPartsUrl", "assignPartsUrl");
+        parameters.put("createPurchaseOrderUrl", "");
+
+        ProcessInstance processInstance = ksession.startProcess("machinery-repair.parts-procurement_v1_0", parameters);
+        Long processInstanceId = processInstance.getId();
+        assertProcessInstanceActive(processInstanceId);
+
+        // check that Inventory has been Requested
+        WorkItem workItem = testHandler.getWorkItem();
+        assertNotNull(workItem);
+        assertEquals("Rest", workItem.getName());
+        assertEquals("inventoryUrl", workItem.getParameter("Url"));
+        assertEquals("GET", workItem.getParameter("Method"));
+
+        Map<String, Object> workItemResult = new HashMap<>();
+        String wsResult = "{\"partCode\":\"A\", \"availableQuantity\":0}";
+        workItemResult.put("Result", wsResult);
+
+        // complete the work item
+        ksession.getWorkItemManager().completeWorkItem(workItem.getId(), workItemResult);
+        assertEquals(wsResult, getVariableValue("wsJsonResponse", processInstanceId, ksession));
+        assertNodeActive(processInstanceId, ksession, "Purchase Order");
+        assertEquals(false, getVariableValue("partsAvailable", processInstanceId, ksession));
+        
+    }
+
     private void completeHappyPath(Long processInstanceId, KieSession ksession, TestWorkItemHandler testHandler) {
         assertNodeActive(processInstanceId, ksession, "Request Inventory Availability");
         WorkItem workItem = testHandler.getWorkItem();
