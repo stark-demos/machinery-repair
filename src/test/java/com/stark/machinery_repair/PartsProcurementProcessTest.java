@@ -217,6 +217,7 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         Map<String, Object> htResults = new HashMap<>();
         htResults.put("quantity", 10);
         htResults.put("partCode", "B");
+        htResults.put("branchCode", "BC-1");
 
         runtimeEngine.getTaskService().complete(taskId, userId, htResults);
         logger.info("Task completed");
@@ -339,6 +340,7 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         Map<String, Object> htResults = new HashMap<>();
         htResults.put("quantity", 10);
         htResults.put("partCode", "B");
+        htResults.put("branchCode", "BC-1");
 
         runtimeEngine.getTaskService().complete(taskId, userId, htResults);
         logger.info("Task completed");
@@ -414,6 +416,7 @@ public class PartsProcurementProcessTest extends JbpmJUnitBaseTestCase {
         Map<String, Object> htResults = new HashMap<>();
         htResults.put("quantity", 10);
         htResults.put("partCode", "B");
+        htResults.put("branchCode", "BC-1");
 
         runtimeEngine.getTaskService().complete(taskId, userId, htResults);
         logger.info("Task completed");
